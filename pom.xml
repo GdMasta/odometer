@@ -4,7 +4,7 @@
 
 	<groupId>org.gdteam.gwt.visualization</groupId>
 	<artifactId>odometer</artifactId>
-	<version>0.1</version>
+	<version>0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>odometer</name>
