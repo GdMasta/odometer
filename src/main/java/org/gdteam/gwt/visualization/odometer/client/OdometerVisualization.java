@@ -1,23 +1,13 @@
 package org.gdteam.gwt.visualization.odometer.client;
 
-import org.vectomatic.dom.svg.OMSVGDefsElement;
-import org.vectomatic.dom.svg.OMSVGDocument;
-import org.vectomatic.dom.svg.OMSVGLength;
-import org.vectomatic.dom.svg.OMSVGLinearGradientElement;
-import org.vectomatic.dom.svg.OMSVGPathElement;
-import org.vectomatic.dom.svg.OMSVGRectElement;
-import org.vectomatic.dom.svg.OMSVGSVGElement;
-import org.vectomatic.dom.svg.OMSVGStopElement;
-import org.vectomatic.dom.svg.OMSVGTextElement;
-import org.vectomatic.dom.svg.itf.ISVGUnitTypes;
-import org.vectomatic.dom.svg.ui.SVGImage;
-import org.vectomatic.dom.svg.utils.OMSVGParser;
-import org.vectomatic.dom.svg.utils.SVGConstants;
-
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDrawOptions;
 import com.google.gwt.visualization.client.AbstractVisualization;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.XMLParser;
 
 public class OdometerVisualization extends AbstractVisualization<OdometerVisualization.OdometerVisualizationDrawOptions> {
 
@@ -36,87 +26,102 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
     
     private static final NumberFormat DECIMAL_FORMAT = NumberFormat.getFormat("#0.##");
 
+    private HTML html;
 
-    private OMSVGSVGElement svg;
-    private OMSVGDocument doc;
-
-    public OdometerVisualization() {
-        this.doc = OMSVGParser.createDocument();
-        this.svg = this.doc.createSVGSVGElement();
-        svg.setAttribute(SVGConstants.SVG_VERSION_ATTRIBUTE, "1.1");
-
-        SVGImage svgImage = new SVGImage(this.svg);
-        initWidget(svgImage);
+    public OdometerVisualization() {        
+        this.html = new HTML();
+        initWidget(html);
+        
     }
 
     @Override
     public void draw(AbstractDataTable data, OdometerVisualizationDrawOptions options) {
-
-        svg.setWidth(OMSVGLength.SVG_LENGTHTYPE_PERCENTAGE, 100.0f);
-        svg.setHeight(OMSVGLength.SVG_LENGTHTYPE_PERCENTAGE, 100.0f);
-        svg.setId("odometer");
-        svg.appendChild(this.createDefs(options));
+        
+        Document doc = XMLParser.createDocument();
+        
+        Element svg = doc.createElement("svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.setAttribute("id", "odometer");
+        svg.setAttribute("version", "1.1");
+        
+        doc.appendChild(svg);
+        
+        svg.appendChild(this.createDefs(doc, options));
         
         if (data.getNumberOfRows() <= 0 || data.getNumberOfColumns() <= 0) {
             return;
         }
-        svg.appendChild(this.createLeftElement());
-        svg.appendChild(this.createText(data.getFormattedValue(0, 0), 0));
+        
+        svg.appendChild(this.createLeftElement(doc));
+      
+        svg.appendChild(this.createText(doc, data.getFormattedValue(0, 0), 0));
         
         if (data.getNumberOfColumns() > 2) {
             for(int i=1;i<data.getNumberOfColumns() - 1;i++) {
-                svg.appendChild(this.createSeparator(i - 1));
-                svg.appendChild(this.createItem(i - 1));
-                svg.appendChild(this.createText(data.getFormattedValue(0, i), i));
+                svg.appendChild(this.createSeparator(doc, i - 1));
+                svg.appendChild(this.createItem(doc, i - 1));
+                svg.appendChild(this.createText(doc, data.getFormattedValue(0, i), i));
             }
         }
         
         if (data.getNumberOfColumns() > 1) {
-            svg.appendChild(this.createSeparator(data.getNumberOfColumns() - 2));
-            svg.appendChild(this.createRightElement(data.getNumberOfColumns()));
-            svg.appendChild(this.createText(data.getFormattedValue(0, data.getNumberOfColumns() - 1), data.getNumberOfColumns() - 1));
+            svg.appendChild(this.createSeparator(doc, data.getNumberOfColumns() - 2));
+            svg.appendChild(this.createRightElement(doc, data.getNumberOfColumns()));
+            svg.appendChild(this.createText(doc, data.getFormattedValue(0, data.getNumberOfColumns() - 1), data.getNumberOfColumns() - 1));
         }
         
-
+        StringBuilder shtml = new StringBuilder();
+        
+        if (options.isSvgwebEnabled()) {
+            shtml.append("<![CDATA[");
+            shtml.append("<script type=\"image/svg+xml\">").append(doc.toString()).append("</script>");
+            shtml.append("]]>");
+        } else {
+            shtml.append(doc.toString());
+        }
+        
+        this.html.setHTML(shtml.toString());
     }
 
-    private OMSVGDefsElement createDefs(OdometerVisualizationDrawOptions options) {
-        OMSVGDefsElement ret = this.doc.createSVGDefsElement();
-
-        OMSVGLinearGradientElement coloredGradient = this.doc.createSVGLinearGradientElement();
-        coloredGradient.setId(ID_COLORED_GRADIENT);
-        coloredGradient.setAttribute(SVGConstants.SVG_X1_ATTRIBUTE, "0%");
-        coloredGradient.setAttribute(SVGConstants.SVG_Y1_ATTRIBUTE, "-10%");
-        coloredGradient.setAttribute(SVGConstants.SVG_X2_ATTRIBUTE, "0%");
-        coloredGradient.setAttribute(SVGConstants.SVG_Y2_ATTRIBUTE, "60%");
+    private Element createDefs(Document doc, OdometerVisualizationDrawOptions options) {
         
-        OMSVGStopElement coloredGradientStop1 = this.doc.createSVGStopElement();
-        coloredGradientStop1.setAttribute(SVGConstants.SVG_OFFSET_ATTRIBUTE, "0%");
-        coloredGradientStop1.setAttribute(SVGConstants.SVG_STYLE_ATTRIBUTE, "stop-color:#FFFFFF;stop-opacity:1" );
+        Element ret = doc.createElement("defs");
+ 
+        Element coloredGradient = doc.createElement("linearGradient");
+        coloredGradient.setAttribute("id", ID_COLORED_GRADIENT);
+        coloredGradient.setAttribute("x1", "0%");
+        coloredGradient.setAttribute("y1", "-10%");
+        coloredGradient.setAttribute("x2", "0%");
+        coloredGradient.setAttribute("y2", "60%");
+        
+        Element coloredGradientStop1 = doc.createElement("stop");
+        coloredGradientStop1.setAttribute("offset", "0%");
+        coloredGradientStop1.setAttribute("style", "stop-color:#FFFFFF;stop-opacity:1" );
         coloredGradient.appendChild(coloredGradientStop1);
         
-        OMSVGStopElement coloredGradientStop2 = this.doc.createSVGStopElement();
-        coloredGradientStop2.setAttribute(SVGConstants.SVG_OFFSET_ATTRIBUTE, "100%");
-        coloredGradientStop2.setAttribute(SVGConstants.SVG_STYLE_ATTRIBUTE, "stop-color:" + options.getSpecialColor() + ";stop-opacity:1" );
+        Element coloredGradientStop2 = doc.createElement("stop");
+        coloredGradientStop2.setAttribute("offset", "100%");
+        coloredGradientStop2.setAttribute("style", "stop-color:" + options.getSpecialColor() + ";stop-opacity:1" );
         coloredGradient.appendChild(coloredGradientStop2);
         
         ret.appendChild(coloredGradient);
         
-        OMSVGLinearGradientElement itemGradient = this.doc.createSVGLinearGradientElement();
-        itemGradient.setId(ID_ITEM_GRADIENT);
-        itemGradient.setAttribute(SVGConstants.SVG_X1_ATTRIBUTE, "0%");
-        itemGradient.setAttribute(SVGConstants.SVG_Y1_ATTRIBUTE, "-10%");
-        itemGradient.setAttribute(SVGConstants.SVG_X2_ATTRIBUTE, "0%");
-        itemGradient.setAttribute(SVGConstants.SVG_Y2_ATTRIBUTE, "60%");
+        Element itemGradient = doc.createElement("linearGradient");
+        itemGradient.setAttribute("id", ID_ITEM_GRADIENT);
+        itemGradient.setAttribute("x1", "0%");
+        itemGradient.setAttribute("y1", "-10%");
+        itemGradient.setAttribute("x2", "0%");
+        itemGradient.setAttribute("y2", "60%");
         
-        OMSVGStopElement itemGradientStop1 = this.doc.createSVGStopElement();
-        itemGradientStop1.setAttribute(SVGConstants.SVG_OFFSET_ATTRIBUTE, "0%");
-        itemGradientStop1.setAttribute(SVGConstants.SVG_STYLE_ATTRIBUTE, "stop-color:#FFFFFF;stop-opacity:1" );
+        Element itemGradientStop1 = doc.createElement("stop");
+        itemGradientStop1.setAttribute("offset", "0%");
+        itemGradientStop1.setAttribute("style", "stop-color:#FFFFFF;stop-opacity:1" );
         itemGradient.appendChild(itemGradientStop1);
         
-        OMSVGStopElement itemGradientStop2 = this.doc.createSVGStopElement();
-        itemGradientStop2.setAttribute(SVGConstants.SVG_OFFSET_ATTRIBUTE, "100%");
-        itemGradientStop2.setAttribute(SVGConstants.SVG_STYLE_ATTRIBUTE, "stop-color:" + options.getItemColor() + ";stop-opacity:1" );
+        Element itemGradientStop2 = doc.createElement("stop");
+        itemGradientStop2.setAttribute("offset", "100%");
+        itemGradientStop2.setAttribute("style", "stop-color:" + options.getItemColor() + ";stop-opacity:1" );
         itemGradient.appendChild(itemGradientStop2);
         
         ret.appendChild(itemGradient);
@@ -124,8 +129,8 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         return ret;
     }
     
-    private OMSVGPathElement createLeftElement() {
-        OMSVGPathElement ret = this.doc.createSVGPathElement();
+    private Element createLeftElement(Document doc) {
+        Element ret = doc.createElement("path");
         
         StringBuilder d = new StringBuilder();
         d.append("M 0,").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" ");
@@ -140,14 +145,14 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         d.append("0,").append(DECIMAL_FORMAT.format(ITEM_SIZE - ROUND_XY)).append(" ");
         d.append("L 0,").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" Z");
         
-        ret.setAttribute(SVGConstants.SVG_D_ATTRIBUTE, d.toString());
-        ret.getStyle().setSVGProperty(SVGConstants.CSS_FILL_PROPERTY, "url(#" + ID_ITEM_GRADIENT + ")");
+        ret.setAttribute("d", d.toString());
+        ret.setAttribute("style", "fill:url(#" + ID_ITEM_GRADIENT + ")");
         
         return ret;
     }
     
-    private OMSVGPathElement createRightElement(int totalItems) {
-        OMSVGPathElement ret = this.doc.createSVGPathElement();
+    private Element createRightElement(Document doc, int totalItems) {
+        Element ret = doc.createElement("path");
         
         double start = ((totalItems) * (ITEM_SIZE + SEPARATOR_SIZE)) - SEPARATOR_SIZE;
         
@@ -163,51 +168,57 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(0d - ROUND_ARG)).append(" ");
         d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(0 - ROUND_XY)).append(" z");
         
-        ret.setAttribute(SVGConstants.SVG_D_ATTRIBUTE, d.toString());
-        ret.getStyle().setSVGProperty(SVGConstants.CSS_FILL_PROPERTY, "url(#" + ID_COLORED_GRADIENT + ")");
+        ret.setAttribute("d", d.toString());
+        ret.setAttribute("style", "fill:url(#" + ID_COLORED_GRADIENT + ")");
         
         return ret;
     }
     
-    private OMSVGRectElement createSeparator(int separatorIndex) {
-        OMSVGRectElement ret = this.doc.createSVGRectElement();
+    private Element createSeparator(Document doc, int separatorIndex) {
+        Element ret = doc.createElement("rect");
         
         double x = (separatorIndex * SEPARATOR_SIZE) + ((separatorIndex + 1) * ITEM_SIZE);
         
-        ret.setAttribute(SVGConstants.SVG_X_ATTRIBUTE, DECIMAL_FORMAT.format(x));
-        ret.setAttribute(SVGConstants.SVG_Y_ATTRIBUTE, "0");
-        ret.setAttribute(SVGConstants.SVG_WIDTH_ATTRIBUTE, DECIMAL_FORMAT.format(SEPARATOR_SIZE));
-        ret.setAttribute(SVGConstants.SVG_HEIGHT_ATTRIBUTE, DECIMAL_FORMAT.format(ITEM_SIZE));
+        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
+        ret.setAttribute("y", "0");
+        ret.setAttribute("width", DECIMAL_FORMAT.format(SEPARATOR_SIZE));
+        ret.setAttribute("height", DECIMAL_FORMAT.format(ITEM_SIZE));
         
-        ret.setAttribute(SVGConstants.SVG_FILL_ATTRIBUTE, SEPARATOR_COLOR);
+        ret.setAttribute("style", "fill:" + SEPARATOR_COLOR);
         
         return ret;
     }
     
-    private OMSVGRectElement createItem(int itemIndex) {
-        OMSVGRectElement ret = this.doc.createSVGRectElement();
+    private Element createItem(Document doc, int itemIndex) {
+        Element ret = doc.createElement("rect");
         
         double x = (itemIndex + 1) * (SEPARATOR_SIZE + ITEM_SIZE);
         
-        ret.setAttribute(SVGConstants.SVG_X_ATTRIBUTE, DECIMAL_FORMAT.format(x));
-        ret.setAttribute(SVGConstants.SVG_Y_ATTRIBUTE, "0");
-        ret.setAttribute(SVGConstants.SVG_WIDTH_ATTRIBUTE, DECIMAL_FORMAT.format(ITEM_SIZE));
-        ret.setAttribute(SVGConstants.SVG_HEIGHT_ATTRIBUTE, DECIMAL_FORMAT.format(ITEM_SIZE));
+        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
+        ret.setAttribute("y", "0");
+        ret.setAttribute("width", DECIMAL_FORMAT.format(ITEM_SIZE));
+        ret.setAttribute("height", DECIMAL_FORMAT.format(ITEM_SIZE));
         
-        ret.getStyle().setSVGProperty(SVGConstants.CSS_FILL_PROPERTY, "url(#" + ID_ITEM_GRADIENT + ")");
+        ret.setAttribute("style", "fill:url(#" + ID_ITEM_GRADIENT + ")");
         
         return ret;
     }
     
-    private OMSVGTextElement createText(String value, int textIndex) {
+    private Element createText(Document doc, String value, int textIndex) {
+        
+        Element ret = doc.createElement("text");
+        ret.setNodeValue(value);
+        
         double x = (textIndex) * (ITEM_SIZE + SEPARATOR_SIZE) + TEXT_X_OFFSET;
-        OMSVGTextElement ret = this.doc.createSVGTextElement(Double.valueOf(x).floatValue(), Double.valueOf(TEXT_Y_OFFSET).floatValue(), ISVGUnitTypes.SVG_UNIT_TYPE_USERSPACEONUSE, value);
+        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
+        ret.setAttribute("y", DECIMAL_FORMAT.format(TEXT_Y_OFFSET));
         
-        ret.setAttribute(SVGConstants.SVG_FONT_SIZE_ATTRIBUTE, DECIMAL_FORMAT.format(TEXT_SIZE));
-        ret.setAttribute(SVGConstants.SVG_FONT_WEIGHT_ATTRIBUTE, "bold");
-        ret.setAttribute(SVGConstants.SVG_FONT_FAMILY_ATTRIBUTE, "Arial");
-        ret.setAttribute(SVGConstants.SVG_FILL_ATTRIBUTE, TEXT_COLOR);
+        ret.setAttribute("font-size", DECIMAL_FORMAT.format(TEXT_SIZE));
+        ret.setAttribute("font-weight", "bold");
+        ret.setAttribute("font-family", "Arial");
+        ret.setAttribute("style", "fill:" + TEXT_COLOR);
         
+        ret.appendChild(doc.createTextNode(value));
         
         return ret;
     }
@@ -227,12 +238,20 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         }-*/;
 
         public final native String getSpecialColor() /*-{
-      return this.specialColor || "#FF00B0";
-    }-*/;
+          return this.specialColor || "#FF00B0";
+        }-*/;
 
         public final native void setSpecialColor(String color) /*-{
-      this.specialColor = color;
-    }-*/;
+          this.specialColor = color;
+        }-*/;
+        
+        public final native boolean isSvgwebEnabled() /*-{
+            return this.svgwebEnabled || false;
+        }-*/;
+
+      public final native void setSvgwebEnabled(boolean enabled) /*-{
+            this.svgwebEnabled = enabled;
+      }-*/;
     }
 
 }

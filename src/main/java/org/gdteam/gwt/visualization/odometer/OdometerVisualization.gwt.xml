@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='odometervisualization'>
   <inherits name='com.google.gwt.user.User'/>
+  <inherits name='com.google.gwt.xml.XML'/>
 
   <!-- Other module inherits                                      -->
   <inherits name="com.google.gwt.visualization.Visualization"/>
-  <inherits name='org.vectomatic.libgwtsvg'/>
  
   <source path="client" />
 </module>
