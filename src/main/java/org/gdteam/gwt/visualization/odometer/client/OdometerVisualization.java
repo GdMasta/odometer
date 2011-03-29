@@ -1,6 +1,7 @@
 package org.gdteam.gwt.visualization.odometer.client;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDrawOptions;
@@ -14,10 +15,10 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
     private static final String ID_COLORED_GRADIENT = "colored_gradient";
     private static final String ID_ITEM_GRADIENT = "item_gradient";
     
-    private static final double ITEM_SIZE = 25.0d;
+    private static final int ITEM_SIZE = 25;
     private static final double ROUND_XY = ITEM_SIZE / 5d;
     private static final double ROUND_ARG = ITEM_SIZE / 15d;
-    private static final double SEPARATOR_SIZE = 1.0d;
+    private static final int SEPARATOR_SIZE = 1;
     private static final String SEPARATOR_COLOR = "#F7F7F7";
     private static final double TEXT_X_OFFSET = ITEM_SIZE / 3.3d;
     private static final double TEXT_Y_OFFSET = ITEM_SIZE / 1.39d;
@@ -40,8 +41,10 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         Document doc = XMLParser.createDocument();
         
         Element svg = doc.createElement("svg");
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
+        
+        int width = ITEM_SIZE * data.getNumberOfColumns() + SEPARATOR_SIZE * data.getNumberOfColumns();
+        svg.setAttribute("width", String.valueOf(width));
+        svg.setAttribute("height", String.valueOf(ITEM_SIZE));
         svg.setAttribute("id", "odometer");
         svg.setAttribute("version", "1.1");
         
@@ -80,7 +83,6 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         } else {
             shtml.append(doc.toString());
         }
-        
         this.html.setHTML(shtml.toString());
     }
 
