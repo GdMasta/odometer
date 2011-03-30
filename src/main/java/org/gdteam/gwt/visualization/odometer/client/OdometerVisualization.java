@@ -45,7 +45,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         int width = ITEM_SIZE * data.getNumberOfColumns() + SEPARATOR_SIZE * data.getNumberOfColumns();
         svg.setAttribute("width", String.valueOf(width));
         svg.setAttribute("height", String.valueOf(ITEM_SIZE));
-        svg.setAttribute("id", "odometer");
+        svg.setAttribute("id", options.getIdPrefix() + "odometer");
         svg.setAttribute("version", "1.1");
         
         doc.appendChild(svg);
@@ -56,21 +56,21 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
             return;
         }
         
-        svg.appendChild(this.createLeftElement(doc));
+        svg.appendChild(this.createLeftElement(doc, options));
       
         svg.appendChild(this.createText(doc, data.getFormattedValue(0, 0), 0));
         
         if (data.getNumberOfColumns() > 2) {
             for(int i=1;i<data.getNumberOfColumns() - 1;i++) {
                 svg.appendChild(this.createSeparator(doc, i - 1));
-                svg.appendChild(this.createItem(doc, i - 1));
+                svg.appendChild(this.createItem(doc, i - 1, options));
                 svg.appendChild(this.createText(doc, data.getFormattedValue(0, i), i));
             }
         }
         
         if (data.getNumberOfColumns() > 1) {
             svg.appendChild(this.createSeparator(doc, data.getNumberOfColumns() - 2));
-            svg.appendChild(this.createRightElement(doc, data.getNumberOfColumns()));
+            svg.appendChild(this.createRightElement(doc, data.getNumberOfColumns(), options));
             svg.appendChild(this.createText(doc, data.getFormattedValue(0, data.getNumberOfColumns() - 1), data.getNumberOfColumns() - 1));
         }
         
@@ -91,7 +91,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         Element ret = doc.createElement("defs");
  
         Element coloredGradient = doc.createElement("linearGradient");
-        coloredGradient.setAttribute("id", ID_COLORED_GRADIENT);
+        coloredGradient.setAttribute("id", options.getIdPrefix() + ID_COLORED_GRADIENT);
         coloredGradient.setAttribute("x1", "0%");
         coloredGradient.setAttribute("y1", "-10%");
         coloredGradient.setAttribute("x2", "0%");
@@ -110,7 +110,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         ret.appendChild(coloredGradient);
         
         Element itemGradient = doc.createElement("linearGradient");
-        itemGradient.setAttribute("id", ID_ITEM_GRADIENT);
+        itemGradient.setAttribute("id", options.getIdPrefix() + ID_ITEM_GRADIENT);
         itemGradient.setAttribute("x1", "0%");
         itemGradient.setAttribute("y1", "-10%");
         itemGradient.setAttribute("x2", "0%");
@@ -131,7 +131,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         return ret;
     }
     
-    private Element createLeftElement(Document doc) {
+    private Element createLeftElement(Document doc, OdometerVisualizationDrawOptions options) {
         Element ret = doc.createElement("path");
         
         StringBuilder d = new StringBuilder();
@@ -148,12 +148,12 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         d.append("L 0,").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" Z");
         
         ret.setAttribute("d", d.toString());
-        ret.setAttribute("style", "fill:url(#" + ID_ITEM_GRADIENT + ")");
+        ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_ITEM_GRADIENT + ")");
         
         return ret;
     }
     
-    private Element createRightElement(Document doc, int totalItems) {
+    private Element createRightElement(Document doc, int totalItems, OdometerVisualizationDrawOptions options) {
         Element ret = doc.createElement("path");
         
         double start = ((totalItems) * (ITEM_SIZE + SEPARATOR_SIZE)) - SEPARATOR_SIZE;
@@ -171,7 +171,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(0 - ROUND_XY)).append(" z");
         
         ret.setAttribute("d", d.toString());
-        ret.setAttribute("style", "fill:url(#" + ID_COLORED_GRADIENT + ")");
+        ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_COLORED_GRADIENT + ")");
         
         return ret;
     }
@@ -191,7 +191,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         return ret;
     }
     
-    private Element createItem(Document doc, int itemIndex) {
+    private Element createItem(Document doc, int itemIndex, OdometerVisualizationDrawOptions options) {
         Element ret = doc.createElement("rect");
         
         double x = (itemIndex + 1) * (SEPARATOR_SIZE + ITEM_SIZE);
@@ -201,7 +201,7 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         ret.setAttribute("width", DECIMAL_FORMAT.format(ITEM_SIZE));
         ret.setAttribute("height", DECIMAL_FORMAT.format(ITEM_SIZE));
         
-        ret.setAttribute("style", "fill:url(#" + ID_ITEM_GRADIENT + ")");
+        ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_ITEM_GRADIENT + ")");
         
         return ret;
     }
@@ -230,6 +230,14 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         protected OdometerVisualizationDrawOptions() {
 
         }
+        
+        public final native String getIdPrefix() /*-{
+            return this.idPrefix || "";
+        }-*/;
+        
+        public final native String setIdPrefix(String prefix)/*-{
+            this.idPrefix = prefix + "-";
+        }-*/;
 
         public final native String getItemColor() /*-{
 			return this.itemColor || "#000000";
