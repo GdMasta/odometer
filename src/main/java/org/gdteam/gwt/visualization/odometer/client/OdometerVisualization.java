@@ -1,7 +1,10 @@
 package org.gdteam.gwt.visualization.odometer.client;
 
+import java.util.logging.Logger;
+
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.visualization.client.AbstractDataTable;
 import com.google.gwt.visualization.client.AbstractDrawOptions;
@@ -26,10 +29,13 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
     private static final String TEXT_COLOR = "#FFFFFF";
     
     private static final NumberFormat DECIMAL_FORMAT = NumberFormat.getFormat("#0.##");
-
+    
+    private static final Logger LOGGER = Logger.getLogger("OdometerVisualization");
+    
     private HTML html;
+    
 
-    public OdometerVisualization() {        
+    public OdometerVisualization() {     
         this.html = new HTML();
         initWidget(html);
         
@@ -135,17 +141,17 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         Element ret = doc.createElement("path");
         
         StringBuilder d = new StringBuilder();
-        d.append("M 0,").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" ");
-        d.append("C 0,").append(DECIMAL_FORMAT.format(ROUND_ARG)).append(" ");
-        d.append(DECIMAL_FORMAT.format(ROUND_ARG)).append(",0 ");
-        d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",0 ");
-        d.append("L ").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(",0 ");
-        d.append("L ").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(",").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(" ");
-        d.append("L ").append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(" ");
-        d.append("C ").append(DECIMAL_FORMAT.format(ROUND_ARG)).append(",").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(" ");
-        d.append("0,").append(DECIMAL_FORMAT.format(ITEM_SIZE - ROUND_ARG)).append(" ");
-        d.append("0,").append(DECIMAL_FORMAT.format(ITEM_SIZE - ROUND_XY)).append(" ");
-        d.append("L 0,").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" Z");
+        d.append("M 0,").append(this.getUnLocalizedValue(ROUND_XY)).append(" ");
+        d.append("C 0,").append(this.getUnLocalizedValue(ROUND_ARG)).append(" ");
+        d.append(this.getUnLocalizedValue(ROUND_ARG)).append(",0 ");
+        d.append(this.getUnLocalizedValue(ROUND_XY)).append(",0 ");
+        d.append("L ").append(this.getUnLocalizedValue(ITEM_SIZE)).append(",0 ");
+        d.append("L ").append(this.getUnLocalizedValue(ITEM_SIZE)).append(",").append(this.getUnLocalizedValue(ITEM_SIZE)).append(" ");
+        d.append("L ").append(this.getUnLocalizedValue(ROUND_XY)).append(",").append(this.getUnLocalizedValue(ITEM_SIZE)).append(" ");
+        d.append("C ").append(this.getUnLocalizedValue(ROUND_ARG)).append(",").append(this.getUnLocalizedValue(ITEM_SIZE)).append(" ");
+        d.append("0,").append(this.getUnLocalizedValue(ITEM_SIZE - ROUND_ARG)).append(" ");
+        d.append("0,").append(this.getUnLocalizedValue(ITEM_SIZE - ROUND_XY)).append(" ");
+        d.append("L 0,").append(this.getUnLocalizedValue(ROUND_XY)).append(" Z");
         
         ret.setAttribute("d", d.toString());
         ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_ITEM_GRADIENT + ")");
@@ -159,16 +165,16 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         double start = ((totalItems) * (ITEM_SIZE + SEPARATOR_SIZE)) - SEPARATOR_SIZE;
         
         StringBuilder d = new StringBuilder();
-        d.append("M ").append(DECIMAL_FORMAT.format(start)).append(",").append(DECIMAL_FORMAT.format(ROUND_XY)).append(" ");
-        d.append("C ").append(DECIMAL_FORMAT.format(start)).append(",").append(DECIMAL_FORMAT.format(ROUND_ARG)).append(" ");
-        d.append(DECIMAL_FORMAT.format(start - ROUND_ARG)).append(", 0 ");
-        d.append(DECIMAL_FORMAT.format(start - ROUND_XY)).append(", 0 ");
-        d.append("L ").append(DECIMAL_FORMAT.format(start - ITEM_SIZE)).append(", 0 ");
-        d.append("L ").append(DECIMAL_FORMAT.format(start - ITEM_SIZE)).append(",").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(" ");
-        d.append("L ").append(DECIMAL_FORMAT.format(start - ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(ITEM_SIZE)).append(" ");
-        d.append("c ").append(DECIMAL_FORMAT.format(ROUND_XY - ROUND_ARG)).append(",0 ");
-        d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(0d - ROUND_ARG)).append(" ");
-        d.append(DECIMAL_FORMAT.format(ROUND_XY)).append(",").append(DECIMAL_FORMAT.format(0 - ROUND_XY)).append(" z");
+        d.append("M ").append(this.getUnLocalizedValue(start)).append(",").append(this.getUnLocalizedValue(ROUND_XY)).append(" ");
+        d.append("C ").append(this.getUnLocalizedValue(start)).append(",").append(this.getUnLocalizedValue(ROUND_ARG)).append(" ");
+        d.append(this.getUnLocalizedValue(start - ROUND_ARG)).append(", 0 ");
+        d.append(this.getUnLocalizedValue(start - ROUND_XY)).append(", 0 ");
+        d.append("L ").append(this.getUnLocalizedValue(start - ITEM_SIZE)).append(", 0 ");
+        d.append("L ").append(this.getUnLocalizedValue(start - ITEM_SIZE)).append(",").append(this.getUnLocalizedValue(ITEM_SIZE)).append(" ");
+        d.append("L ").append(this.getUnLocalizedValue(start - ROUND_XY)).append(",").append(this.getUnLocalizedValue(ITEM_SIZE)).append(" ");
+        d.append("c ").append(this.getUnLocalizedValue(ROUND_XY - ROUND_ARG)).append(",0 ");
+        d.append(this.getUnLocalizedValue(ROUND_XY)).append(",").append(this.getUnLocalizedValue(0d - ROUND_ARG)).append(" ");
+        d.append(this.getUnLocalizedValue(ROUND_XY)).append(",").append(this.getUnLocalizedValue(0 - ROUND_XY)).append(" z");
         
         ret.setAttribute("d", d.toString());
         ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_COLORED_GRADIENT + ")");
@@ -181,10 +187,10 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         
         double x = (separatorIndex * SEPARATOR_SIZE) + ((separatorIndex + 1) * ITEM_SIZE);
         
-        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
+        ret.setAttribute("x", this.getUnLocalizedValue(x));
         ret.setAttribute("y", "0");
-        ret.setAttribute("width", DECIMAL_FORMAT.format(SEPARATOR_SIZE));
-        ret.setAttribute("height", DECIMAL_FORMAT.format(ITEM_SIZE));
+        ret.setAttribute("width", this.getUnLocalizedValue(SEPARATOR_SIZE));
+        ret.setAttribute("height", this.getUnLocalizedValue(ITEM_SIZE));
         
         ret.setAttribute("style", "fill:" + SEPARATOR_COLOR);
         
@@ -196,10 +202,10 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         
         double x = (itemIndex + 1) * (SEPARATOR_SIZE + ITEM_SIZE);
         
-        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
+        ret.setAttribute("x", this.getUnLocalizedValue(x));
         ret.setAttribute("y", "0");
-        ret.setAttribute("width", DECIMAL_FORMAT.format(ITEM_SIZE));
-        ret.setAttribute("height", DECIMAL_FORMAT.format(ITEM_SIZE));
+        ret.setAttribute("width", this.getUnLocalizedValue(ITEM_SIZE));
+        ret.setAttribute("height", this.getUnLocalizedValue(ITEM_SIZE));
         
         ret.setAttribute("style", "fill:url(#" + options.getIdPrefix() + ID_ITEM_GRADIENT + ")");
         
@@ -212,10 +218,10 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         ret.setNodeValue(value);
         
         double x = (textIndex) * (ITEM_SIZE + SEPARATOR_SIZE) + TEXT_X_OFFSET;
-        ret.setAttribute("x", DECIMAL_FORMAT.format(x));
-        ret.setAttribute("y", DECIMAL_FORMAT.format(TEXT_Y_OFFSET));
+        ret.setAttribute("x", this.getUnLocalizedValue(x));
+        ret.setAttribute("y", this.getUnLocalizedValue(TEXT_Y_OFFSET));
         
-        ret.setAttribute("font-size", DECIMAL_FORMAT.format(TEXT_SIZE));
+        ret.setAttribute("font-size", this.getUnLocalizedValue(TEXT_SIZE));
         ret.setAttribute("font-weight", "bold");
         ret.setAttribute("font-family", "Arial");
         ret.setAttribute("style", "fill:" + TEXT_COLOR);
@@ -223,6 +229,17 @@ public class OdometerVisualization extends AbstractVisualization<OdometerVisuali
         ret.appendChild(doc.createTextNode(value));
         
         return ret;
+    }
+    
+    /**
+     * Fix locale problems
+     * @return Formatted values
+     */
+    private String getUnLocalizedValue(double number) {
+        String decimalSeparator = LocaleInfo.getCurrentLocale().getNumberConstants().decimalSeparator();
+        String groupingSeparator = LocaleInfo.getCurrentLocale().getNumberConstants().groupingSeparator();
+        
+        return DECIMAL_FORMAT.format(number).replace(decimalSeparator, ".").replace(groupingSeparator, "");
     }
      
 
